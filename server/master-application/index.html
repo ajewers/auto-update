@@ -7,10 +7,15 @@
 <style>
 body {
   font-family: "Arial", sans-serif;
+  overflow: hidden;
+}
+.container {
+  position: absolute;
+  top: 450px;
+  width: 100%;
+  overflow: hidden;
 }
 .main {
-  top: 450px;
-  padding: 20px;
   font-family: "Arial", sans-serif;
 }
 .button {
@@ -27,21 +32,13 @@ body {
 .button:hover {
   background: #4be;
 }
-.progress-bar-outer {
-  position: relative;
-  width: 250px;
-  height: 50px;
-  border: 2px solid #3af;
-  background: rgba(0, 0, 0, 0);
-  border-radius: 3px;
-}
 .progress-bar-inner {
   position: absolute;
   top: 0px;
   left: 0px;
   width: 2%;
-  height: 100%;
-  background: #1f8;
+  height: 8px;
+  background: #0d3;
   transition: 0.5s;
 }
 .progress-bar-text {
@@ -52,7 +49,6 @@ body {
   color: white;
   text-align: center;
 }
-
 .update-bar {
   position: fixed;
   top: 0%;
@@ -72,7 +68,7 @@ body {
   border-bottom: 2px solid #ccc;
 }
 .inline-button {
-  padding: 2px;
+  padding: 4px;
   display: inline;
   min-width: 150px;
   height: 40px;
@@ -103,9 +99,11 @@ body {
         <span>Checking for updates...</span>
       </div>
     </div>
-    <div class="main" align="center">
-      <h1>Auto Update Test Application</h1>
-      <div id="check-updates-button" class="button">Check For Updates</div>
+    <div class="container">
+      <div class="main" align="center">
+        <h1>Auto Update Test Application</h1>
+        <div id="check-updates-button" class="button">Check For Updates</div>
+      </div>
     </div>
   </body>
   <script src="./lib/jquery-3.3.1.min.js" onload="window.$ = window.jQuery = module.exports;"></script>

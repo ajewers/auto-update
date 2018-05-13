@@ -4,36 +4,46 @@ const ipcRenderer = require('electron').ipcRenderer;
 // Services
 const AutoUpdateClientService = require('./services/AutoUpdateClientService.js');
 
+// Application startup
 $(document).ready(() => {
+  // Check for updates
   updateBarCheck();
 });
 
 $('#check-updates-button').on('click', updateBarCheck);
 
 function updateBarCheck() {
+  // Show the update bar and checking message
   $('#update-bar').addClass('active');
   $('#update-bar-available').hide();
   $('#update-bar-progress').hide();
   $('#update-bar-checking').show();
 
+  // Revert to zero progress
   setUpdateProgress(0, "");
 
+  // Perform the update check
   checkForUpdates()
-  .then((updates, diff) => {
+  .then((updates) => {
+    // Hide the checking message
     $('#update-bar-checking').hide();
 
+    // If there are updates, show the update button
     if (updates) {
       $('#update-bar-available').show();
     } else {
+      // No updates, show the progress indicator and jump to 100%
       $('#update-bar-progress').show();
       setUpdateProgress(100, "Up to date.");
 
+      // Wait three seconds then hide the update bar
       setTimeout(() => {
         $('#update-bar').removeClass('active');
       }, 3000);
     }
   })
   .catch(err => {
+    // If an error occurs, show the error and revert to zero progress
     $('#update-bar-available').hide();
     $('#update-bar-checking').hide();
     $('#update-bar-progress').show();
@@ -47,7 +57,7 @@ function checkForUpdates() {
     .then(() => recalcMasterManifest())                             // Tell the server to recalculate the master manifest
     .then(() => AutoUpdateClientService.compareToMasterManifest())  // Compare manifests
     .then(diff => {
-      resolve(Object.keys(diff).length > 0, diff);
+      resolve(Object.keys(diff).length > 0);                        // Resolve with a boolean indicating whether updates exist
     })
     .catch(err => {
       reject(err);
@@ -79,14 +89,17 @@ $('#get-update-button').on('click', () => {
     }
   })
   .then(zip => AutoUpdateClientService.applyZip(zip))             // Apply the files in the zip
-  .then(folder => {
+  .then(zip => AutoUpdateClientService.deleteZip(zip))            // Delete the used zip archive
+  .then(() => {
     setUpdateProgress(100, "Restarting...");
 
+    // Wait 1 second for restarting message to be seen, then send command to main thread to restart
     setTimeout(() => {
-      ipcRenderer.send('reload');
+      ipcRenderer.send('restart');
     }, 1000);
   })
   .catch(err => {
+    // If an error occurs revert to zero progress and show the error message
     setUpdateProgress(0, err);
   })
 });
@@ -110,11 +123,6 @@ function recalcMasterManifest() {
 }
 
 function setUpdateProgress(perc, text) {
-  /*var width = (perc/100) * 250;
-  $('.progress-bar-inner ').css('width', width);
-
-  $('#progress-text').html(text);*/
-
   $('#progress-bar-inner').css('width', perc + "%");
   $('#progress-bar-text').html(text);
-}//#
+}

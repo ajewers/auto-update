@@ -37,14 +37,4 @@ mongoose.connect('mongodb://127.0.0.1/AutoUpdate')
   http.listen(serverPort, () => {
     console.log('Server started on port ' + serverPort);
   });
-
-  // Initialise auto update service
-  AutoUpdateService.init()
-  .then(() => {
-    console.log("[AutoUpdateService] Iniitialisation complete.");
-  })
-  .catch(err => {
-    console.log("Iniitialisation error");
-    console.log(err);
-  })
 });

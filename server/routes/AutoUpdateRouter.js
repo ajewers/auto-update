@@ -5,26 +5,7 @@ var router = express.Router();
 const fs = require('fs-extra');
 
 // Services
-const AutoUpdateService = require('../services/AutoUpdateService.js')
-
-router.get('/', function(req, res) {
-  res.send("Success");
-});
-
-/**
- * Get the checksum of the master manifest file for quick comparison
- *
- * {GET} /autoupdate/masterchecksum
- */
-router.get('/masterchecksum', function(req, res) {
-  AutoUpdateService.getMasterManifestChecksum()
-  .then(masterCS => {
-    res.json({"status": "OK", "checksum": masterCS});
-  })
-  .catch(err => {
-    res.json({"status": "error", "err": err});
-  });
-});
+const AutoUpdateService = require('../services/AutoUpdateService.js');
 
 /**
  * Recalculate the master manifest
@@ -66,7 +47,7 @@ router.post('/diffzip', function(req, res) {
   .then(path => fs.readFile(path)) // Read the zip file as a data stream
   .then(data => {
     // Respond to the request with the zip data
-    res.set("Content-Disposition", "attachment;filename=test.zip");
+    res.set("Content-Disposition", "attachment;filename=update.zip");
     res.writeHead(200, {'Content-Type': 'application/octet-stream'});
     res.end(data);
   })

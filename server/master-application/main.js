@@ -9,7 +9,7 @@ let win;
 
 function createWindow () {
   // Create the browser window.
-  win = new BrowserWindow({width: 800, height: 600});
+  win = new BrowserWindow({show: false});
 
   // Load index.html
   win.loadURL(url.format({
@@ -23,6 +23,11 @@ function createWindow () {
 
   // Maximise
   win.maximize();
+
+  // Show when ready
+  win.once('ready-to-show', () => {
+    win.show();
+  })
 
   // Emitted when the window is closed.
   win.on('closed', () => {
@@ -51,7 +56,7 @@ app.on('activate', () => {
   }
 });
 
-ipcMain.on('reload', () => {
+ipcMain.on('restart', () => {
   // Set app to re-launch after exit
   app.relaunch();
 

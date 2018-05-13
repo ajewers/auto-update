@@ -7,7 +7,6 @@ const unzipper = require('unzipper');
 
 // Application location
 const appRoot = path.join(__dirname, '../');
-const appManifest = path.join(__dirname, '../../application-manifest.json');
 
 // Manifest of master application
 var localManifest = {};
@@ -19,10 +18,6 @@ var AutoUpdateClientService = {
       AutoUpdateClientService.checkFolder(appRoot)
       .then(data => {
         localManifest = data;
-
-        return fs.writeFile(appManifest, JSON.stringify(localManifest, null, 2));
-      })
-      .then(() => {
         resolve();
       })
       .catch(err => {
@@ -121,19 +116,6 @@ var AutoUpdateClientService = {
     return localManifest;
   },
 
-  // Get the checksum of the local manifest file
-  getLocalManifestChecksum : () => {
-    return new Promise((resolve, reject) => {
-      checksum.file(appManifest, function(err, sum) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(sum);
-        }
-      });
-    })
-  },
-
   // Compare the local manifest to the master manifest
   compareToMasterManifest : () => {
     return new Promise((resolve, reject) => {
@@ -157,7 +139,7 @@ var AutoUpdateClientService = {
   getDiffZip : (diff) => {
     return new Promise((resolve, reject) => {
       var url = "http://127.0.0.1:4000/autoupdate/diffzip";
-      var zipfile = path.join(__dirname, '../../zips/test.zip');
+      var zipfile = path.join(__dirname, '../../update.zip');
 
       request.post({
         headers: {'content-type' : 'application/json'},
@@ -177,18 +159,37 @@ var AutoUpdateClientService = {
   // Decompress the zip and apply the updated files
   applyZip : (zip) => {
     return new Promise((resolve, reject) => {
+      // The target folder is the root of the application
       var folder = path.join(__dirname, '../');
+
+      // Create an extractor
       var extractor = unzipper.Extract({ path: folder });
 
+      // When the extractor completes, return the path to the zip file, so it may be deleted
       extractor.on('close', () => {
-        resolve(folder);
+        resolve(zip);
       });
 
+      // Reject if errors occur
       extractor.on('error', err => {
         reject(err);
       });
 
+      // Begin extracting
       fs.createReadStream(zip).pipe(extractor);
+    });
+  },
+
+  // Delete a zip file that is no longer needed
+  deleteZip : (zip) => {
+    return new Promise((resolve, reject) => {
+      fs.unlink(zip)
+      .then(() => {
+        resolve();
+      })
+      .catch(err => {
+        reject(err);
+      })
     });
   }
 }
