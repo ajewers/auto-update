@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Auto Update App</title>
+  </head>
+<style>
+body {
+  font-family: "Arial", sans-serif;
+}
+.main {
+  top: 450px;
+  padding: 20px;
+  font-family: "Arial", sans-serif;
+}
+.button {
+  width: 250px;
+  height: 50px;
+  line-height: 50px;
+  background: #3af;
+  transition: 0.5s;
+  cursor: pointer;
+  text-align: center;
+  color: white;
+  border-radius: 3px;
+}
+.button:hover {
+  background: #4be;
+}
+.progress-bar-outer {
+  position: relative;
+  width: 250px;
+  height: 50px;
+  border: 2px solid #3af;
+  background: rgba(0, 0, 0, 0);
+  border-radius: 3px;
+}
+.progress-bar-inner {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 2%;
+  height: 100%;
+  background: #1f8;
+  transition: 0.5s;
+}
+.progress-bar-text {
+  position: absolute;
+  height: 100%;
+  line-height: 40px;
+  width: 100%;
+  color: white;
+  text-align: center;
+}
+
+.update-bar {
+  position: fixed;
+  top: 0%;
+  left: 0px;
+  width: 100%;
+  height: 0px;
+  line-height: 40px;
+  background: #3af;
+  color: white;
+  text-align: center;
+  align-content: center;
+  overflow-y: hidden;
+  transition: 0.5s;
+}
+.update-bar.active {
+  height: 40px;
+  border-bottom: 2px solid #ccc;
+}
+.inline-button {
+  padding: 2px;
+  display: inline;
+  min-width: 150px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  color: #3af;
+  background: white;
+  transition: 0.5s;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.inline-button:hover {
+  background: #4bf;
+  color: white;
+}
+</style>
+  <body>
+    <div id="update-bar" class="update-bar">
+      <div id="update-bar-available">
+        <span>Updates are available.</span>
+        <div id="get-update-button" class="inline-button">Update</div>
+      </div>
+      <div id="update-bar-progress">
+        <div id="progress-bar-inner" class="progress-bar-inner"></div>
+        <div id="progress-bar-text" class="progress-bar-text"></div>
+      </div>
+      <div id="update-bar-checking">
+        <span>Checking for updates...</span>
+      </div>
+    </div>
+    <div class="main" align="center">
+      <h1>Auto Update Test Application</h1>
+      <div id="check-updates-button" class="button">Check For Updates</div>
+    </div>
+  </body>
+  <script src="./lib/jquery-3.3.1.min.js" onload="window.$ = window.jQuery = module.exports;"></script>
+  <script src="./core/app.js"></script>
+</html>

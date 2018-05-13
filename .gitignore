@@ -1,0 +1,6 @@
+zips/
+node_modules/
+package-lock.json
+application-manifest.json
+master-application-manifest.json
+test-app/

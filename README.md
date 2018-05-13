@@ -1,0 +1,3 @@
+# Auto Updating Electron App Demo #
+
+This app and server pair demonstrates auto-update functionality for an electron app. First run npm install within the /server directory, and then again within the /server/master-application directory. The contents of the master-application directory should then be copied to another directory, and run as an electron app (shortcut: npm start). The server should also be run. The app will then be able to check itself against the app copy in the master-application folder on the server, and download any new or modified files, overwriting its existing files and restarting once completed.
