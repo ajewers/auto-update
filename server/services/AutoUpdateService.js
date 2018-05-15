@@ -3,8 +3,11 @@ const fs = require('fs-extra');
 const path = require('path');
 const checksum = require('checksum');
 
+// Database models
+const ManifestModel = require('../schema/manifest-schema.js')
+
 // Master application location
-const masterAppRoot = path.join(__dirname, '../master-application');
+const masterAppRoot = path.join(__dirname, '../application-masters');
 const masterAppManifest = path.join(__dirname, '../../master-application-manifest.json');
 
 // External modules
@@ -15,14 +18,10 @@ var masterManifest = {};
 
 var AutoUpdateService = {
   // Create the manifest file describing the master application
-  createManifest : () => {
+  createManifest : (appname) => {
     return new Promise((resolve, reject) => {
-      AutoUpdateService.checkFolder(masterAppRoot)
-      .then(data => {
-        masterManifest = data;
-
-        return fs.writeFile(masterAppManifest, JSON.stringify(masterManifest, null, 2));
-      })
+      AutoUpdateService.checkFolder(masterAppRoot + "/" + appname)
+      .then(data => ManifestModel.update({appname: appname}, {manifest: JSON.stringify(data)}, {upsert: true, new: true}))
       .then(() => {
         resolve();
       })
@@ -133,27 +132,32 @@ var AutoUpdateService = {
     });
   },
 
-  // Get the manifest file for the master application
-  getMasterManifest : () => {
-    return masterManifest;
-  },
-
-  // Get the checksum of the master manifest file
-  getMasterManifestChecksum : () => {
+  // Get the manifest file for the an application
+  getMasterManifest : (appname) => {
     return new Promise((resolve, reject) => {
-      checksum.file(masterAppManifest, function(err, sum) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(sum);
-        }
+      ManifestModel.findOne({appname: appname})
+      .then(doc => {
+        resolve(JSON.parse(doc.manifest));
+      })
+      .catch(err => {
+        reject(err);
       });
-    })
+    });
   },
 
-  // Compare a manifest file against the master, returning an object containing the differing files/folders
-  compareManifest : (manifest) => {
-    return AutoUpdateService.compareFolders(masterManifest, manifest);
+  // Compare a provided manifest against the manifest for an application master,
+  // returning an object containing the differing files/folders
+  compareManifest : (manifest, appname) => {
+    return new Promise((resolve, reject) => {
+      AutoUpdateService.getMasterManifest(appname)
+      .then(masterManifest => AutoUpdateService.compareFolders(masterManifest, manifest))
+      .then(diff => {
+        resolve(diff);
+      })
+      .catch(err => {
+        reject(err);
+      });
+    });
   },
 
   // Compare two folders within two manifests
@@ -194,16 +198,16 @@ var AutoUpdateService = {
   },
 
   // Create and save a zip archive of all the files identified in a diff
-  createDiffZip : (diff) => {
+  createDiffZip : (diff, appname) => {
     return new Promise((resolve, reject) => {
       // Creat empty zip object
       var zip = new JSZip();
 
       // Recursively add files to the zip object
-      AutoUpdateService.zipFolder(diff, zip, masterAppRoot)
+      AutoUpdateService.zipFolder(diff, zip, masterAppRoot + "/" + appname)
       .then(() => {
         // Path to store the zip
-        var zipSavePath = path.join(__dirname, '../zips/update.zip');
+        var zipSavePath = path.join(__dirname, '../zips/' + appname + '.zip');
 
         // Save the zip through a write stream
         zip.generateNodeStream({type:'nodebuffer', streamFiles:true})

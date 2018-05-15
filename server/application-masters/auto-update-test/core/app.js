@@ -54,7 +54,7 @@ function updateBarCheck() {
 function checkForUpdates() {
   return new Promise((resolve, reject) => {
     AutoUpdateClientService.createManifest()                        // Create the local manifest
-    .then(() => recalcMasterManifest())                             // Tell the server to recalculate the master manifest
+    .then(() => AutoUpdateClientService.recalcMasterManifest())     // Tell the server to recalculate the master manifest
     .then(() => AutoUpdateClientService.compareToMasterManifest())  // Compare manifests
     .then(diff => {
       resolve(Object.keys(diff).length > 0);                        // Resolve with a boolean indicating whether updates exist
@@ -75,7 +75,7 @@ $('#get-update-button').on('click', () => {
 
   AutoUpdateClientService.createManifest()                        // Create the local manifest
   .then(() => setUpdateProgress(25, "Retreiving master manifest..."))
-  .then(() => recalcMasterManifest())                             // Tell the server to recalculate the master manifest
+  .then(() => AutoUpdateClientService.recalcMasterManifest())     // Tell the server to recalculate the master manifest
   .then(() => setUpdateProgress(50, "Creating diff.."))
   .then(() => AutoUpdateClientService.compareToMasterManifest())  // Compare manifests
   .then(diff => {
@@ -103,24 +103,6 @@ $('#get-update-button').on('click', () => {
     setUpdateProgress(0, err);
   })
 });
-
-function recalcMasterManifest() {
-  return new Promise((resolve, reject) => {
-    var url = "http://127.0.0.1:4000/autoupdate/recalcmastermanifest";
-
-    $.ajax({
-      method: "GET",
-      url: url,
-      success: function(data) {
-        if (data.status == "OK") {
-          resolve();
-        } else {
-          reject(data.err);
-        }
-      }
-    });
-  });
-}
 
 function setUpdateProgress(perc, text) {
   $('#progress-bar-inner').css('width', perc + "%");

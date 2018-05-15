@@ -5,6 +5,9 @@ const checksum = require('checksum');
 const request = require('request');
 const unzipper = require('unzipper');
 
+// Application name tag
+const appName = "auto-update-test";
+
 // Application location
 const appRoot = path.join(__dirname, '../');
 
@@ -119,7 +122,7 @@ var AutoUpdateClientService = {
   // Compare the local manifest to the master manifest
   compareToMasterManifest : () => {
     return new Promise((resolve, reject) => {
-      var url = "http://127.0.0.1:4000/autoupdate/compare";
+      var url = "http://127.0.0.1:4000/autoupdate/compare/" + appName;
       var localManifest = AutoUpdateClientService.getLocalManifest();
 
       $.ajax({
@@ -128,8 +131,13 @@ var AutoUpdateClientService = {
         contentType: 'application/json',
         dataType: "json",
         data: JSON.stringify(localManifest),
-        success: function(diff) {
-          resolve(diff);
+        success: function(data) {
+          if (data.status == "OK") {
+            resolve(data.diff);
+          } else {
+            console.log(data.err);
+            reject(data.err);
+          }
         }
       });
     });
@@ -138,7 +146,7 @@ var AutoUpdateClientService = {
   // Get a zip file containing any files identified in the diff manifest
   getDiffZip : (diff) => {
     return new Promise((resolve, reject) => {
-      var url = "http://127.0.0.1:4000/autoupdate/diffzip";
+      var url = "http://127.0.0.1:4000/autoupdate/diffzip/" + appName;
       var zipfile = path.join(__dirname, '../../update.zip');
 
       request.post({
@@ -191,7 +199,26 @@ var AutoUpdateClientService = {
         reject(err);
       })
     });
+  },
+
+  recalcMasterManifest : () => {
+    return new Promise((resolve, reject) => {
+      var url = "http://127.0.0.1:4000/autoupdate/recalcmastermanifest/" + appName;
+
+      $.ajax({
+        method: "GET",
+        url: url,
+        success: function(data) {
+          if (data.status == "OK") {
+            resolve();
+          } else {
+            console.log(data.err);
+            reject(data.err);
+          }
+        }
+      });
+    });
   }
-}
+}//#
 
 module.exports = AutoUpdateClientService;
